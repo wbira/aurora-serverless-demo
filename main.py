@@ -19,14 +19,14 @@ def handleInsert(item):
   dbName = os.environ['DatabaseName']
   cluster_arn = os.environ['DBAuroraClusterArn']
   secret_arn = os.environ['DBSecretsStoreArn']
-  #INSERT_CMD = 'INSERT INTO credit_card(reservation_id_prefix, card_number, card_type ,token_url, status, attempts) VALUES (:resIdPrefix,:card_number,:card_type,:token_url,:status,:attempts)'
+  INSERT_CMD = 'INSERT INTO credit_card(reservation_id_prefix, card_number, card_type ,token_url, status, attempts) VALUES (:resIdPrefix,:card_number,:card_type,:token_url,:status,:attempts)'
 
   response = rdsData.execute_statement(
       resourceArn = cluster_arn,
       secretArn = secret_arn,
       database = dbName,
       parameters = getParams(item),
-      sql = 'SELECT card_number, reservation_id_prefix as cr FROM credit_card')
+      sql = INSERT_CMD)
   print('SQL reponse', response)
   return response
 
@@ -34,6 +34,7 @@ def handler(event, context):
   for record in event.get('Records'):
     eventName = record.get('eventName')
     item = record.get('dynamodb')
+    
     if eventName == 'INSERT':
       handleInsert(item)
     elif eventName == 'MODIFY':
